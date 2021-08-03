@@ -6,17 +6,20 @@ http://nodered.org
 [![Coverage Status](https://coveralls.io/repos/node-red/node-red/badge.svg?branch=master)](https://coveralls.io/r/node-red/node-red?branch=master)
 
 A visual tool for wiring the Internet of Things.
+Phiên bản có thể chạy trên host như heroku.....
 
 ![Node-RED: A visual tool for wiring the Internet of Things](http://nodered.org/images/node-red-screenshot.png)
 
-## Quick Start
+## HƯỚNG DẪN KHỞI CHẠY
 
-Check out http://nodered.org/docs/getting-started/ for full instructions on getting
-started.
-
-1. `sudo npm install -g --unsafe-perm node-red`
-2. `node-red`
-3. Open <http://localhost:1880>
+1. clone project này về
+2. cd vào thư mục project (node-red-host)
+3. Mở cửa sổ cmd tại thư mục ấy
+4. Chạy lệnh `npm install`
+5. Xong! Chạy lệnh `npm start`
+6. Mở `localhost/admin` để chỉnh sửa node.
+7. Tài khoản đăng nhập mặc định là: user = admin; password = admin
+8. Nếu cài đặt node-red-dashboard thì dashboard được hiển thị tại `localhost` thay vì `localhost/ui`
 
 ## Getting Help
 
