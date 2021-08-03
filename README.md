@@ -16,7 +16,7 @@ Phiên bản có thể chạy trên host như heroku.....
 2. cd vào thư mục project (node-red-host)
 3. Mở cửa sổ cmd tại thư mục ấy
 4. Chạy lệnh `npm install`
-5. Xong! Chạy lệnh `npm start`
+5. Xong! Chạy lệnh `npm start` hoặc `node red.js` để khởi chạy
 6. Mở `localhost/admin` để chỉnh sửa node.
 7. Tài khoản đăng nhập mặc định là: user = admin; password = admin
 8. Nếu cài đặt node-red-dashboard thì dashboard được hiển thị tại `localhost` thay vì `localhost/ui`
