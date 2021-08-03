@@ -98,6 +98,10 @@ if (parsedArgs.argv.remain.length > 0) {
 
 process.env.NODE_RED_HOME = process.env.NODE_RED_HOME || __dirname;
 
+/////////////////////////////////////////
+parsedArgs.settings = path.join(__dirname,"settings.js");
+/////////////////////////////////////////
+
 if (parsedArgs.settings) {
     // User-specified settings file
     settingsFile = parsedArgs.settings;
