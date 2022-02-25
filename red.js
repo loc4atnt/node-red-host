@@ -98,10 +98,6 @@ if (parsedArgs.argv.remain.length > 0) {
 
 process.env.NODE_RED_HOME = process.env.NODE_RED_HOME || __dirname;
 
-/////////////////////////////////////////
-parsedArgs.settings = path.join(__dirname,"settings.js");
-/////////////////////////////////////////
-
 if (parsedArgs.settings) {
     // User-specified settings file
     settingsFile = parsedArgs.settings;
@@ -198,6 +194,11 @@ if (process.env.NODE_RED_ENABLE_PROJECTS) {
     settings.editorTheme.projects.enabled = !/^false$/i.test(process.env.NODE_RED_ENABLE_PROJECTS);
 }
 
+if (process.env.NODE_RED_ENABLE_TOURS) {
+    settings.editorTheme = settings.editorTheme || {};
+    settings.editorTheme.tours = !/^false$/i.test(process.env.NODE_RED_ENABLE_TOURS);
+}
+
 
 var defaultServerSettings = {
     "x-powered-by": false
@@ -238,8 +239,13 @@ httpsPromise.then(function(startupHttps) {
                             // Get the result of the function, because createServer doesn't accept functions as input
                             Promise.resolve(settings.https()).then(function(refreshedHttps) {
                                 if (refreshedHttps) {
+                                    // The key/cert needs to be updated in the NodeJs http(s) server, when no key/cert is yet available or when the key/cert has changed.
+                                    // Note that the refreshed key/cert can be supplied as a string or a buffer.
+                                    var updateKey = (server.key == undefined || (Buffer.isBuffer(server.key) && !server.key.equals(refreshedHttps.key)) || (typeof server.key == "string" && server.key != refreshedHttps.key));
+                                    var updateCert = (server.cert == undefined || (Buffer.isBuffer(server.cert) && !server.cert.equals(refreshedHttps.cert)) || (typeof server.cert == "string" && server.cert != refreshedHttps.cert));
+
                                     // Only update the credentials in the server when key or cert has changed
-                                    if(!server.key || !server.cert || !server.key.equals(refreshedHttps.key) || !server.cert.equals(refreshedHttps.cert)) {
+                                    if(updateKey || updateCert) {
                                         server.setSecureContext(refreshedHttps);
                                         RED.log.info(RED.log._("server.https.settings-refreshed"));
                                     }
@@ -454,9 +460,17 @@ httpsPromise.then(function(startupHttps) {
     process.on('uncaughtException',function(err) {
         util.log('[red] Uncaught Exception:');
         if (err.stack) {
-            util.log(err.stack);
+            try {
+                RED.log.error(err.stack);
+            } catch(err2) {
+                util.log(err.stack);
+            }
         } else {
-            util.log(err);
+            try {
+                RED.log.error(err);
+            } catch(err2) {
+                util.log(err);
+            }
         }
         process.exit(1);
     });

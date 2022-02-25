@@ -2,24 +2,18 @@
 
 http://nodered.org
 
-[![Build Status](https://travis-ci.org/node-red/node-red.svg)](https://travis-ci.org/node-red/node-red)
-[![Coverage Status](https://coveralls.io/repos/node-red/node-red/badge.svg?branch=master)](https://coveralls.io/r/node-red/node-red?branch=master)
+Low-code programming for event-driven applications.
 
-A visual tool for wiring the Internet of Things.
-Phiên bản có thể chạy trên host như heroku.....
+![Node-RED: Low-code programming for event-driven applications.](http://nodered.org/images/node-red-screenshot.png)
 
-![Node-RED: A visual tool for wiring the Internet of Things](http://nodered.org/images/node-red-screenshot.png)
+## Quick Start
 
-## HƯỚNG DẪN KHỞI CHẠY
+Check out http://nodered.org/docs/getting-started/ for full instructions on getting
+started.
 
-1. clone project này về
-2. cd vào thư mục project (node-red-host)
-3. Mở cửa sổ cmd tại thư mục ấy
-4. Chạy lệnh `npm install`
-5. Xong! Chạy lệnh `npm start` hoặc `node red.js` để khởi chạy
-6. Mở `localhost/admin` để chỉnh sửa node.
-7. Tài khoản đăng nhập mặc định là: user = admin; password = admin
-8. Nếu cài đặt node-red-dashboard thì dashboard được hiển thị tại `localhost` thay vì `localhost/ui`
+1. `sudo npm install -g --unsafe-perm node-red`
+2. `node-red`
+3. Open <http://localhost:1880>
 
 ## Getting Help
 
@@ -42,15 +36,14 @@ This project adheres to the [Contributor Covenant 1.4](http://contributor-covena
 
 ## Authors
 
-Node-RED is a project of the [JS Foundation](http://js.foundation).
+Node-RED is a project of the [OpenJS Foundation](http://openjsf.org).
 
-It was created by [IBM Emerging Technology](https://www.ibm.com/blogs/emerging-technology/).
+It is maintained by:
 
-* Nick O'Leary [@knolleary](http://twitter.com/knolleary)
-* Dave Conway-Jones [@ceejay](http://twitter.com/ceejay)
-
-
+ * Nick O'Leary [@knolleary](http://twitter.com/knolleary)
+ * Dave Conway-Jones [@ceejay](http://twitter.com/ceejay)
+ * And many others...
 
 ## Copyright and license
 
-Copyright JS Foundation and other contributors, http://js.foundation under [the Apache 2.0 license](LICENSE).
+Copyright OpenJS Foundation and other contributors, https://openjsf.org under [the Apache 2.0 license](LICENSE).
