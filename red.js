@@ -98,6 +98,10 @@ if (parsedArgs.argv.remain.length > 0) {
 
 process.env.NODE_RED_HOME = process.env.NODE_RED_HOME || __dirname;
 
+/////////////////////////////////////////
+parsedArgs.settings = path.join(__dirname,"settings.js");
+/////////////////////////////////////////
+
 if (parsedArgs.settings) {
     // User-specified settings file
     settingsFile = parsedArgs.settings;
@@ -112,10 +116,6 @@ if (parsedArgs.settings) {
         // Consider compatibility for older versions
         settingsFile = path.join(process.env.HOMEPATH,".node-red","settings.js");
     } else {
-        if (!parsedArgs.userDir && !(process.env.HOME || process.env.USERPROFILE || process.env.HOMEPATH)) {
-            console.log("Could not find user directory. Ensure $HOME is set for the current user, or use --userDir option")
-            process.exit(1)
-        }
         var userDir = parsedArgs.userDir || path.join(process.env.HOME || process.env.USERPROFILE || process.env.HOMEPATH,".node-red");
         var userSettingsFile = path.join(userDir,"settings.js");
         if (fs.existsSync(userSettingsFile)) {
@@ -198,11 +198,6 @@ if (process.env.NODE_RED_ENABLE_PROJECTS) {
     settings.editorTheme.projects.enabled = !/^false$/i.test(process.env.NODE_RED_ENABLE_PROJECTS);
 }
 
-if (process.env.NODE_RED_ENABLE_TOURS) {
-    settings.editorTheme = settings.editorTheme || {};
-    settings.editorTheme.tours = !/^false$/i.test(process.env.NODE_RED_ENABLE_TOURS);
-}
-
 
 var defaultServerSettings = {
     "x-powered-by": false
@@ -243,13 +238,8 @@ httpsPromise.then(function(startupHttps) {
                             // Get the result of the function, because createServer doesn't accept functions as input
                             Promise.resolve(settings.https()).then(function(refreshedHttps) {
                                 if (refreshedHttps) {
-                                    // The key/cert needs to be updated in the NodeJs http(s) server, when no key/cert is yet available or when the key/cert has changed.
-                                    // Note that the refreshed key/cert can be supplied as a string or a buffer.
-                                    var updateKey = (server.key == undefined || (Buffer.isBuffer(server.key) && !server.key.equals(refreshedHttps.key)) || (typeof server.key == "string" && server.key != refreshedHttps.key));
-                                    var updateCert = (server.cert == undefined || (Buffer.isBuffer(server.cert) && !server.cert.equals(refreshedHttps.cert)) || (typeof server.cert == "string" && server.cert != refreshedHttps.cert));
-
                                     // Only update the credentials in the server when key or cert has changed
-                                    if(updateKey || updateCert) {
+                                    if(!server.key || !server.cert || !server.key.equals(refreshedHttps.key) || !server.cert.equals(refreshedHttps.cert)) {
                                         server.setSecureContext(refreshedHttps);
                                         RED.log.info(RED.log._("server.https.settings-refreshed"));
                                     }
@@ -300,26 +290,6 @@ httpsPromise.then(function(startupHttps) {
     if (settings.httpNodeRoot !== false) {
         settings.httpNodeRoot = formatRoot(settings.httpNodeRoot || settings.httpRoot || "/");
         settings.httpNodeAuth = settings.httpNodeAuth || settings.httpAuth;
-    }
-
-    if(settings.httpStatic) {
-        settings.httpStaticRoot = formatRoot(settings.httpStaticRoot || "/");
-        const statics = Array.isArray(settings.httpStatic) ? settings.httpStatic : [settings.httpStatic];
-        const sanitised = [];
-        for (let si = 0; si < statics.length; si++) {
-            let sp = statics[si];
-            if(typeof sp === "string") {
-                sp = { path: sp, root: "" }
-                sanitised.push(sp);
-            } else if (typeof sp === "object" && sp.path ) {
-                sanitised.push(sp);
-            } else {
-                continue;
-            }
-            sp.subRoot = formatRoot(sp.root);
-            sp.root = formatRoot(path.posix.join(settings.httpStaticRoot,sp.subRoot));
-        }
-        settings.httpStatic = sanitised.length ? sanitised : false;    
     }
 
     // if we got a port from command line, use it (even if 0)
@@ -414,28 +384,12 @@ httpsPromise.then(function(startupHttps) {
     if (settings.httpNodeRoot !== false) {
         app.use(settings.httpNodeRoot,RED.httpNode);
     }
-    // if (settings.httpStatic) {
-    //     settings.httpStaticAuth = settings.httpStaticAuth || settings.httpAuth;
-    //     if (settings.httpStaticAuth) {
-    //         app.use("/",basicAuthMiddleware(settings.httpStaticAuth.user,settings.httpStaticAuth.pass));
-    //     }
-    //     app.use("/",express.static(settings.httpStatic));
-    // }
     if (settings.httpStatic) {
-        let appUseMem = {};
-        for (let si = 0; si < settings.httpStatic.length; si++) {
-            const sp = settings.httpStatic[si];
-            const filePath = sp.path;
-            const thisRoot = sp.root || "/";
-            if(appUseMem[filePath + "::" + thisRoot]) {
-                continue;// this path and root already registered!
-            }
-            appUseMem[filePath + "::" + thisRoot] = true;
-            if (settings.httpStaticAuth) {
-                app.use(thisRoot, basicAuthMiddleware(settings.httpStaticAuth.user, settings.httpStaticAuth.pass));
-            }
-            app.use(thisRoot, express.static(filePath));
+        settings.httpStaticAuth = settings.httpStaticAuth || settings.httpAuth;
+        if (settings.httpStaticAuth) {
+            app.use("/",basicAuthMiddleware(settings.httpStaticAuth.user,settings.httpStaticAuth.pass));
         }
+        app.use("/",express.static(settings.httpStatic));
     }
 
     function getListenPath() {
@@ -500,17 +454,9 @@ httpsPromise.then(function(startupHttps) {
     process.on('uncaughtException',function(err) {
         util.log('[red] Uncaught Exception:');
         if (err.stack) {
-            try {
-                RED.log.error(err.stack);
-            } catch(err2) {
-                util.log(err.stack);
-            }
+            util.log(err.stack);
         } else {
-            try {
-                RED.log.error(err);
-            } catch(err2) {
-                util.log(err);
-            }
+            util.log(err);
         }
         process.exit(1);
     });
